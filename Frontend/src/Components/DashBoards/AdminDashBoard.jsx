@@ -36,7 +36,7 @@ const AdminDashBoard = () => {
           </div>
           <div className="flex gap-4">
             <a 
-              href="/NewProduct" 
+              href="/ProductRegister" 
               className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md shadow-indigo-100 transition-all duration-200 transform hover:-translate-y-0.5"
             >
               <FiPlus className="w-5 h-5" />
