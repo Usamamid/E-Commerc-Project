@@ -21,13 +21,6 @@ const SideBar = ({ isLoggedIn }) => {
     <div className="w-full md:w-64 bg-white rounded-2xl shadow-md p-5 border border-gray-200 flex flex-col justify-between">
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-blue-700 mb-6 px-2">Navigation</h2>
-        
-        <button 
-          onClick={() => navigate('/')} 
-          className="w-full text-left px-4 py-2.5 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition duration-200 flex items-center gap-3"
-        >
-          <span>🏠</span> Home / Products
-        </button>
 
         <button 
           onClick={() => navigate('/Cart')} 

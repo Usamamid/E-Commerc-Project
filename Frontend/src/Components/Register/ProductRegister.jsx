@@ -4,10 +4,11 @@ import axios from 'axios';
 const ProductRegister = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [stock, setStock] = useState(''); 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Image change handler with preview
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -16,7 +17,7 @@ const ProductRegister = () => {
     }
   };
 
-  // Submit Handler (Sirf 3 fields backend par jaayengi)
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -24,6 +25,7 @@ const ProductRegister = () => {
     data.append('image', image);
     data.append('name', name);
     data.append('price', price);
+    data.append('stock', stock); 
 
     try {
       const response = await axios.post('http://localhost:3000/products/create', data, {
@@ -32,16 +34,17 @@ const ProductRegister = () => {
       });
 
       alert("✅ Product Created Successfully!");
-      console.log(response.data);
+      (response.data);
 
-      // Form reset
+     
       setName('');
       setPrice('');
+      setStock(''); 
       setImage(null);
       setImagePreview(null);
 
     } catch (err) {
-      console.error(err);
+      (err);
       alert("❌ Failed to create product!");
     }
   };
@@ -50,7 +53,7 @@ const ProductRegister = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-6 border border-gray-100">
         
-        {/* Header */}
+       
         <div className="border-b pb-4 mb-6 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">Add New Medicine</h2>
           <a href="/AdminDashBoard" className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full hover:bg-blue-200 transition">
@@ -60,7 +63,7 @@ const ProductRegister = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* 1. Image Upload */}
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
             <div className="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 relative">
@@ -82,7 +85,7 @@ const ProductRegister = () => {
             </div>
           </div>
 
-          {/* 2. Medicine / Product Name */}
+         
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
             <input 
@@ -95,7 +98,7 @@ const ProductRegister = () => {
             />
           </div>
 
-          {/* 3. Price */}
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
             <input 
@@ -108,10 +111,22 @@ const ProductRegister = () => {
             />
           </div>
 
-          {/* Submit Button */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Initial Stock / Quantity</label>
+            <input 
+              type="number" 
+              placeholder="50" 
+              value={stock} 
+              onChange={(e) => setStock(e.target.value)} 
+              required 
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+
+        
           <button 
             type="submit" 
-            className="w-full mt-2 bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md"
+            className="w-full mt-2 bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md cursor-pointer"
           >
             Create Product
           </button>

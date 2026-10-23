@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../Navbar/Navbar";
+import axios from "axios";
 
-// Coupons object sirf ek dafa component ke bahar define hoga
+
 const Coupons = {
   "SAVE5": 5,
   "FLAT10": 10,
@@ -15,13 +15,13 @@ const Cart = ({ cart, setCart }) => {
   const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
 
-  // Fixed to use _id instead of id
+  
   const increaseQty = (_id) => {
     const newCart = cart.map((item) => {
       if (item._id === _id) {
         return {
           ...item,
-          Quantity: Number(item.Quantity) + 1
+          quantity: Number(item.quantity || item.Quantity) + 1
         };
       }
       return item;
@@ -32,9 +32,10 @@ const Cart = ({ cart, setCart }) => {
   const decreaseQty = (_id) => {
     const newCart = cart.map((item) => {
       if (item._id === _id) {
+        const currentQty = Number(item.quantity || item.Quantity);
         return {
           ...item,
-          Quantity: Number(item.Quantity) > 1 ? Number(item.Quantity) - 1 : 1
+          quantity: currentQty > 1 ? currentQty - 1 : 1
         };
       }
       return item;
@@ -43,7 +44,8 @@ const Cart = ({ cart, setCart }) => {
   };
 
   const subtotal = cart.reduce((total, item) => {
-    return total + Number(item.price) * Number(item.Quantity);
+    const qty = Number(item.quantity || item.Quantity || 1);
+    return total + Number(item.price) * qty;
   }, 0);
 
   const deliveryCharges = subtotal < 1000 && subtotal > 0 ? 200 : 0;
@@ -61,9 +63,43 @@ const Cart = ({ cart, setCart }) => {
   const GrandTotal = Number(subtotal) + Number(deliveryCharges) - Number(discount);
   const isDeliveryChargesApplicable = deliveryCharges > 0;
 
+  const confirmOrder = async () => {
+    try {
+      const loggedInUserId = localStorage.getItem("userId");
+
+      if (!loggedInUserId) {
+        alert("Please login first!");
+        navigate("/Register"); 
+        return;
+      }
+
+      const response = await axios.post(
+        "http://localhost:3000/order/orders",
+        {
+          items: cart.map(item => ({
+            product: item._id,
+            name: item.name,
+            price: item.price,
+            quantity: Number(item.quantity || item.Quantity || 1) 
+          })),
+          totalAmount: GrandTotal,
+          user: loggedInUserId
+        },
+        {
+          withCredentials: true
+        }
+      );
+
+      alert("✅ Order confirmed successfully and stock updated!");
+      setCart([]); 
+
+    } catch (error) {
+      alert(error.response?.data?.message || "Order failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <Navbar />
       <button onClick={() => navigate("/")} className="text-blue-700 absolute top-1 left-2 text-sm">
         Back To Home
       </button>
@@ -73,7 +109,6 @@ const Cart = ({ cart, setCart }) => {
 
       <div className="max-w-5xl mx-auto grid lg:grid-cols-3 gap-6">
 
-        {/* Cart Items */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-5 shadow-gray-600">
           {cart.length === 0 ? (
             <div className="text-center text-gray-500 hover:text-gray-700 transition-colors duration-300">
@@ -100,15 +135,16 @@ const Cart = ({ cart, setCart }) => {
                   <div>
                     <h2 className="text-xl font-semibold">{item.name}</h2>
                     <p className="text-green-600 font-bold">${item.price}</p>
+                    {item.stock !== undefined && (
+                      <p className="text-xs text-slate-500">Available Stock: {item.stock}</p>
+                    )}
                   </div>
                 </div>
-
-                {/* Quantity & Delete Controls */}
                 <div className="flex items-center gap-3">
                   <button onClick={() => decreaseQty(item._id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
                     -
                   </button>
-                  <span className="font-bold text-lg">{item.Quantity}</span>
+                  <span className="font-bold text-lg">{item.quantity || item.Quantity || 1}</span>
                   <button onClick={() => increaseQty(item._id)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
                     +
                   </button>
@@ -121,7 +157,7 @@ const Cart = ({ cart, setCart }) => {
           )}
         </div>
 
-        {/* Bill Section */}
+        
         <div className="bg-white rounded-xl shadow-lg p-5 h-fit shadow-gray-600">
           <h2 className="text-2xl font-bold mb-5 text-center">Bill Summary</h2>
 
@@ -164,7 +200,7 @@ const Cart = ({ cart, setCart }) => {
             <span>${GrandTotal}</span>
           </div>
 
-          <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition duration-200">
+          <button onClick={confirmOrder} className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition duration-200 cursor-pointer">
             Confirm Order
           </button>
         </div>

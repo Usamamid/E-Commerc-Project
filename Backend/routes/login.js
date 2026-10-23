@@ -5,47 +5,77 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const ownerModel = require('../models/ownerModel');
 
+const isProd = process.env.NODE_ENV === 'production';
+
+const baseCookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    path: '/'
+};
+
+const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
+const loginCookieOptions = { ...baseCookieOptions, maxAge: ONE_YEAR };
+
 router.post('/', async (req, res) => {
     try {
-        let { email, password } = req.body;
+        const { email, password } = req.body;
 
-        // 1. Pehle Owner check karo
-        let owner = await ownerModel.findOne({ $or: [{ email: email }, { name: email }] });
-        
-        if (owner) {
-            if (owner.password === password) {
-                const token = jwt.sign({ id: owner._id, email: owner.email || owner.name, name: owner.name || "Owner", role: 'owner' }, process.env.JWT_SECRET);
-                res.cookie("token", token, { httpOnly: true });
-                return res.status(200).json({ 
-                    message: "Owner login successfully", 
-                    role: "owner",
-                    user: { name: owner.name || "Owner", email: owner.email || owner.name }
-                });
-            } else {
-                return res.status(401).json({ message: "Incorrect Owner Password" });
-            }
+        if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
         }
 
-        // 2. Agar owner nahi mila, toh Normal User check karo
-        let user = await userModel.findOne({ email });
+        const owner = await ownerModel.findOne({ name: email });
+
+        if (owner) {
+            const isOwnerMatch = await bcrypt.compare(password, owner.password);
+            if (!isOwnerMatch) {
+                return res.status(401).json({ message: "Incorrect Owner Password" });
+            }
+
+            const token = jwt.sign(
+                { id: owner._id, email: owner.name, name: owner.name, role: 'owner' },
+                process.env.JWT_SECRET
+            );
+            res.cookie("token", token, loginCookieOptions);
+
+            return res.status(200).json({
+                message: "Owner login successfully",
+                role: "owner",
+                userId: owner._id,
+                user: {
+                    _id: owner._id,
+                    name: owner.name,
+                    email: owner.name
+                }
+            });
+        }
+
+        const user = await userModel.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "Email not registered / User not found" });
         }
 
-        // 3. User Password Compare
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: "Incorrect Password" });
         }
 
-        // 4. User Token & Cookie
-        const token = jwt.sign({ id: user._id, email: user.email, name: user.name, role: 'user' }, process.env.JWT_SECRET);
-        res.cookie("token", token, { httpOnly: true });
+        const token = jwt.sign(
+            { id: user._id, email: user.email, name: user.name, role: 'user' },
+            process.env.JWT_SECRET
+        );
+        res.cookie("token", token, loginCookieOptions);
 
-        res.status(200).json({ 
-            message: "Login successfully", 
-            role: "user", 
-            user: { name: user.name, email: user.email } 
+        res.status(200).json({
+            message: "Login successfully",
+            role: "user",
+            userId: user._id,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+            }
         });
 
     } catch (err) {
@@ -61,29 +91,24 @@ router.get('/checkAuth', (req, res) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Token se data nikal kar sahi format mein bhej rahe hain
-        res.status(200).json({ 
-            isAuthenticated: true, 
+
+        res.status(200).json({
+            isAuthenticated: true,
             role: decoded.role,
+            userId: decoded.id,
             user: {
+                _id: decoded.id,
                 name: decoded.name || "User",
                 email: decoded.email
-            } 
+            }
         });
     } catch (err) {
         res.status(401).json({ isAuthenticated: false });
     }
 });
 
-// Logout Route (Cookie ko clear karega)
 router.get('/logout', (req, res) => {
-    // Cookie ko clear karne ke liye exact wahi options dein
-    res.clearCookie('token', {
-        httpOnly: true,
-        sameSite: 'lax', // Agar cross-origin hai toh adjust karein
-        path: '/'
-    });
+    res.clearCookie('token', baseCookieOptions);
     return res.status(200).json({ message: "Logged out successfully" });
 });
 

@@ -4,7 +4,7 @@ const userModel=require('../models/userModel')
 const bcrypt=require('bcrypt')
 
 router.post('/Create', async(req, res) => {
-    // Logic to fetch users from the database
+   
    try{
      let {name,email,password}=req.body;
      const existingUser=await userModel.findOne({email:email})

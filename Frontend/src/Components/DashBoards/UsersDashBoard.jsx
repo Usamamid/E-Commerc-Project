@@ -4,42 +4,63 @@ import axios from 'axios';
 
 const UsersDashBoard = () => {
   const [user, setUser] = useState({ name: "User", email: "user@example.com" });
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // User details fetch karne ke liye (agar backend par route ho)
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchUserDataAndOrders = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/login/checkAuth', {
-          withCredentials: true
-        });
-        if (response.data.isAuthenticated && response.data.user) {
-          setUser(response.data.user);
+        let currentUserId = localStorage.getItem("userId");
+        try {
+          const authResponse = await axios.get('http://localhost:3000/login/checkAuth', {
+            withCredentials: true
+          });
+
+          if (authResponse.data.isAuthenticated && authResponse.data.user) {
+            setUser(authResponse.data.user);
+            if (authResponse.data.userId || authResponse.data.user._id) {
+              currentUserId = authResponse.data.userId || authResponse.data.user._id;
+            }
+          }
+        } catch (authErr) {
+          console.warn("CheckAuth failed or unauthorized, falling back to localStorage userId:", currentUserId, authErr);
+        }
+
+        if (currentUserId) {
+          const ordersResponse = await axios.get(`http://localhost:3000/order/user/${currentUserId}`, {
+            withCredentials: true
+          });
+          if (ordersResponse.data.success) {
+            setOrders(ordersResponse.data.orders);
+          }
         }
       } catch (err) {
-        console.error("Error fetching user profile:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserProfile();
+    fetchUserDataAndOrders();
   }, []);
 
   const handleLogout = async () => {
     try {
       await axios.get('http://localhost:3000/logout', { withCredentials: true });
-      navigate('/Register');
     } catch (err) {
-      console.error("Logout failed", err);
+      console.error(err);
+    } finally {
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userRole");
+      navigate('/Register');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      
+    <div className="min-h-screen bg-gray-100 pb-12">
       <div className="max-w-6xl mx-auto p-6 mt-4">
+        
         {/* Welcome Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg mb-8 flex flex-col md:flex-row justify-between items-center">
           <div>
@@ -48,7 +69,7 @@ const UsersDashBoard = () => {
           </div>
           <button 
             onClick={() => navigate('/')} 
-            className="mt-4 md:mt-0 bg-white text-blue-600 font-semibold px-5 py-2.5 rounded-xl shadow hover:bg-blue-50 transition duration-200"
+            className="mt-4 md:mt-0 bg-white text-blue-600 font-semibold px-5 py-2.5 rounded-xl shadow hover:bg-blue-50 transition duration-200 cursor-pointer"
           >
             Browse Medicines
           </button>
@@ -58,7 +79,7 @@ const UsersDashBoard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Left Column: Profile Card */}
-          <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 h-fit">
             <div className="flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-blue-100 text-blue-600 font-bold text-3xl rounded-full flex items-center justify-center mb-4">
                 {user.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -75,24 +96,22 @@ const UsersDashBoard = () => {
             <div className="space-y-3">
               <button 
                 onClick={() => navigate('/Cart')} 
-                className="w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-between"
+                className="w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-between cursor-pointer"
               >
                 <span>🛒 View Shopping Cart</span>
                 <span className="text-blue-600 font-bold">&rarr;</span>
               </button>
               <button 
                 onClick={handleLogout} 
-                className="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium flex items-center justify-between"
+                className="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium flex items-center justify-between cursor-pointer"
               >
                 <span>🚪 Logout</span>
               </button>
             </div>
           </div>
 
-          {/* Right Column: Quick Stats & Recent Activity */}
           <div className="md:col-span-2 space-y-6">
             
-            {/* Quick Actions / Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div 
                 onClick={() => navigate('/')} 
@@ -113,18 +132,68 @@ const UsersDashBoard = () => {
               </div>
             </div>
 
-            {/* Recent Orders Section (Placeholder) */}
             <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-200">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Orders</h3>
-              <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
-                <p>No recent orders found.</p>
-                <button 
-                  onClick={() => navigate('/')} 
-                  className="mt-3 text-blue-600 font-semibold text-sm underline hover:text-blue-700"
-                >
-                  Start shopping now
-                </button>
-              </div>
+
+              {loading ? (
+                <div className="text-center py-8 text-gray-400">Loading orders...</div>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
+                  <p>No recent orders found.</p>
+                  <button 
+                    onClick={() => navigate('/')} 
+                    className="mt-3 text-blue-600 font-semibold text-sm underline hover:text-blue-700 cursor-pointer"
+                  >
+                    Start shopping now
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <div key={order._id} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                      <div className="flex justify-between items-center mb-3 border-b pb-2 flex-wrap gap-2">
+                        <div>
+                          <span className="text-gray-500 text-xs">Order ID: </span>
+                          <span className="font-mono text-xs font-semibold text-gray-700">{order._id}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-400 text-xs">
+                            {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) : ""}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                          }`}>
+                            {order.status || "Pending"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        {order.items.map((item, index) => (
+                          <div key={index} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700 font-medium">
+                              {item.name} <span className="text-gray-400 text-xs">(x{item.quantity})</span>
+                            </span>
+                            <span className="text-gray-600 font-semibold">${item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-between items-center mt-3 pt-3 border-t font-bold text-sm">
+                        <span className="text-gray-700">Total Amount:</span>
+                        <span className="text-blue-600 font-bold">${order.totalAmount}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>

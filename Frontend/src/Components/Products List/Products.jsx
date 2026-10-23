@@ -3,12 +3,12 @@ import Navbar from '../Navbar/Navbar';
 import SideBar from '../DashBoards/SideBar';
 import axios from 'axios';
 
-const Products = ({ addToCart }) => {
+const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Zoomed Image aur Notification states
+
+ 
   const [selectedImage, setSelectedImage] = useState(null);
   const [notification, setNotification] = useState("");
 
@@ -27,15 +27,21 @@ const Products = ({ addToCart }) => {
       } catch (err) {
         setIsLoggedIn(false);
         localStorage.removeItem('userRole');
+        (err)
       }
     };
 
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:3000/products');
-        setProducts(response.data);
+        
+        const productData = Array.isArray(response.data) 
+          ? response.data 
+          : (response.data.products || response.data.allProducts || []);
+          
+        setProducts(productData);
       } catch (err) {
-        console.error("Error fetching products:", err);
+        (err);
       } finally {
         setLoading(false);
       }
@@ -45,22 +51,40 @@ const Products = ({ addToCart }) => {
     fetchProducts();
   }, []);
 
-  // Handle Add to Cart with feedback message
   const handleAddToCart = (product) => {
+    if (product.stock <= 0) {
+      setNotification(`Sorry! ${product.name} is out of stock.`);
+      return;
+    }
+
     addToCart(product);
-    setNotification(`${product.name} cart mein add ho gaya hai! 🛒`);
+    setNotification(`${product.name} added to Cart! 🛒`);
     setTimeout(() => {
       setNotification("");
     }, 3000);
   };
 
+  const handleSearchClick = () => {
+    
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+  };
+
+  const filteredProducts = products.filter((product) => {
+    const searchTerm = search ? search.toLowerCase() : "";
+    return product.name && product.name.toLowerCase().includes(searchTerm);
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 relative">
-      <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      <Navbar handleInputChange={handleInputChange} handleSearchClick={handleSearchClick} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} search={search} setSearch={setSearch} />
       
-      {/* Success Notification Banner */}
+      
       {notification && (
-        <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded-xl shadow-lg z-50 transition duration-300">
+        <div className="fixed top-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-xl shadow-lg z-50 transition duration-300">
           {notification}
         </div>
       )}
@@ -76,61 +100,79 @@ const Products = ({ addToCart }) => {
           <div className="flex-1">
             {loading ? (
               <p className="text-gray-600">Loading products...</p>
-            ) : products.length === 0 ? (
+            ) : filteredProducts.length === 0 ? (
               <p className="text-gray-500">No products available right now.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <div 
-                    key={product._id} 
-                    className="bg-white rounded-xl shadow-md p-4 border border-gray-200 flex flex-col justify-between"
-                  >
-                    {/* Image Container with Click to Zoom */}
+                {filteredProducts.map((product) => {
+                  const isOutOfStock = product.stock <= 0;
+
+                  return (
                     <div 
-                      onClick={() => product.image && setSelectedImage(product.image)}
-                      className="w-full h-40 bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden cursor-pointer group relative"
+                      key={product._id} 
+                      className="bg-white rounded-xl shadow-md p-4 border border-gray-200 flex flex-col justify-between relative"
                     >
-                      {product.image ? (
-                        <>
-                          <img 
-                            src={product.image} 
-                            alt={product.name} 
-                            className="w-full h-full object-contain group-hover:scale-105 transition duration-200" 
-                          />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center text-white text-xs font-semibold">
-                            🔍 Click to Zoom
-                          </div>
-                        </>
+                      {isOutOfStock ? (
+                        <span className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow z-10">
+                          Out of Stock
+                        </span>
                       ) : (
-                        <span className="text-gray-400 text-xs">No Image</span>
+                        <span className="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow z-10">
+                          Stock: {product.stock}
+                        </span>
                       )}
-                    </div>
 
-                    <div className="flex justify-between items-center mb-3">
-                      <p className="font-semibold text-gray-800 truncate" title={product.name}>
-                        {product.name}
-                      </p>
-                      <p className="text-blue-600 font-bold">
-                        \${product.price}
-                      </p>
-                    </div>
+                      <div 
+                        onClick={() => product.image && setSelectedImage(product.image)}
+                        className="w-full h-40 bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden cursor-pointer group relative"
+                      >
+                        {product.image ? (
+                          <>
+                            <img 
+                              src={product.image} 
+                              alt={product.name} 
+                              className={`w-full h-full object-contain group-hover:scale-105 transition duration-200 ${isOutOfStock ? 'opacity-60 grayscale' : ''}`} 
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center text-white text-xs font-semibold">
+                              🔍 Click to Zoom
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-xs">No Image</span>
+                        )}
+                      </div>
 
-                    <button 
-                      onClick={() => handleAddToCart(product)} 
-                      type="button" 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition duration-200 cursor-pointer"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex justify-between items-center mb-3">
+                        <p className="font-semibold text-gray-800 truncate" title={product.name}>
+                          {product.name}
+                        </p>
+                        <p className="text-blue-600 font-bold">
+                          \${product.price}
+                        </p>
+                      </div>
+
+                      <button 
+                        onClick={() => handleAddToCart(product)} 
+                        type="button" 
+                        disabled={isOutOfStock}
+                        className={`w-full font-medium py-2 rounded-lg transition duration-200 ${
+                          isOutOfStock 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+                        }`}
+                      >
+                        {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Image Zoom Modal Overlay */}
+     
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)} 

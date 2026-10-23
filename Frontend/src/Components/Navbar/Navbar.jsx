@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import axios from 'axios';
 
-const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
+const Navbar = ({ isLoggedIn, setIsLoggedIn,search,handleInputChange,handleSearchClick }) => {
   const navigate = useNavigate();
 
   const setHandleLogout = async () => {
@@ -14,7 +14,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
       alert("Logout Successfully!");
       navigate('/Register');
     } catch (err) {
-      console.log("Logout error:", err);
+      (err);
       alert("Logout failed!");
     }
   };
@@ -42,12 +42,15 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
 
         <div className="flex items-center gap-2">
           <input 
+            value={search}
+            onChange={handleInputChange}
             type="text" 
             placeholder="Search medicines..." 
             className="bg-gray-700 text-white placeholder:text-gray-400 border border-gray-600 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <div className="w-9 h-9 bg-gray-700 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-600 transition">
-            <button className="flex items-center justify-center text-white">
+            <button onClick={handleSearchClick} className="flex items-center justify-center text-white">
+              
               <Search size={18} />
             </button>
           </div>
