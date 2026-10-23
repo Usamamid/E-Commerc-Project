@@ -1,0 +1,9 @@
+{
+  "name": "pharmacy-ecommerce",
+  "version": "1.0.0",
+  "description": "Full stack pharmacy mern app",
+  "scripts": {
+    "build": "cd Frontend && npm install && npm run build && cd ../Backend && npm install",
+    "start": "node Backend/app.js"
+  }
+}

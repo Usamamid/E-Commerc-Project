@@ -23,4 +23,12 @@ app.use('/users',userRoute);
 app.use('/products',productRoute);
 app.use('/login',login)
 app.use('/order', orderRoute)
+
+
+app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
+});
+
 app.listen(3000)
