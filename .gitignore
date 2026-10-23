@@ -1,9 +1,9 @@
-# Node modules (Dono folders ke liye)
+# Node modules (dono folders ke liye)
 **/node_modules/
 
 # Environment configurations and logs
 .env
-config/development.json
+Backend/config/development.json
 *.log
 
 # Build folders
