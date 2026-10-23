@@ -1,6 +1,0 @@
-{
-    "MONGODB_URI": "mongodb://localhost:27017/ecommerce",
-    "ADMIN_NAME": "usama@gmail.com",
-    "PASSWORD": "admin123"
-
-}
