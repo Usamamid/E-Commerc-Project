@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 
-const UsersDashBoard = () => {
+const UsersDashboard = () => {
   const [user, setUser] = useState({ name: "User", email: "user@example.com" });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -200,4 +200,4 @@ const UsersDashBoard = () => {
   );
 };
 
-export default UsersDashBoard;
+export default UsersDashboard;

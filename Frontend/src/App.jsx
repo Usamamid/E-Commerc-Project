@@ -5,7 +5,7 @@ import Products from './Components/Products List/Products';
 import AdminDashBoard from './Components/DashBoards/AdminDashBoard';
 import Register from './Components/Register/Register';
 import ProductRegister from './Components/Register/ProductRegister';
-import UsersDashBoard from './Components/DashBoards/UsersDashBoard'
+import UsersDashboard from './Components/DashBoards/UsersDashboard'
 
 const App = () => {
   const [cart, setCart] = useState(() => {
@@ -57,7 +57,7 @@ const App = () => {
           <Route path='/Register' element={<Register cart={cart} setCart={setCart} />}/>
           <Route path='/AdminDashBoard' element={<AdminDashBoard cart={cart} setCart={setCart} search={search} setSearch={setSearch}/>}/>
           <Route path='/ProductRegister' element={<ProductRegister cart={cart} setCart={setCart} search={search} setSearch={setSearch}/>}/>
-          <Route path='/UsersDashBoard' element={<UsersDashBoard cart={cart} setCart={setCart} search={search} setSearch={setSearch}/>}/>
+          <Route path='/UsersDashboard' element={<UsersDashboard cart={cart} setCart={setCart} search={search} setSearch={setSearch}/>}/>
         </Routes>
     </div>
   );
