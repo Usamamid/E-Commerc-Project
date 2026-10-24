@@ -9,3 +9,4 @@ Backend/config/development.json
 # Build folders
 dist/
 build/
+.vercel
