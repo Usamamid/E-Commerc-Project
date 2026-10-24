@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import API from "../../services/api";
+import storeLogo from "../../assets/images/storeLogo.png";
 
 const Navbar = ({ isLoggedIn, setIsLoggedIn, search, handleInputChange, handleSearchClick }) => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, search, handleInputChange, handleSe
           <h2 className="text-xl font-bold">NH-U Store</h2>
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
             <img 
-              src="https://cdn.vectorstock.com/i/1000v/27/60/medical-pharmacy-logo-design-template-vector-35392760.jpg" 
+              src={storeLogo.png} 
               alt="Logo" 
               className="w-full h-full object-cover" 
             />
