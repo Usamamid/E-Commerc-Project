@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../Navbar/Navbar';
 import SideBar from '../DashBoards/SideBar';
-import axios from 'axios';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 
 const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
- 
   const [selectedImage, setSelectedImage] = useState(null);
   const [notification, setNotification] = useState("");
 
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/login/checkAuth', {
-          withCredentials: true
-        });
+        const response = await API.get('/login/checkAuth'); // ✅ Updated: Relative path via central API
         if (response.data.isAuthenticated) {
           setIsLoggedIn(true);
           if (response.data.role) {
@@ -27,13 +24,13 @@ const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
       } catch (err) {
         setIsLoggedIn(false);
         localStorage.removeItem('userRole');
-        (err)
+        console.error(err);
       }
     };
 
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/products');
+        const response = await API.get('/products'); // ✅ Updated: Relative path via central API
         
         const productData = Array.isArray(response.data) 
           ? response.data 
@@ -41,7 +38,7 @@ const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
           
         setProducts(productData);
       } catch (err) {
-        (err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -81,7 +78,6 @@ const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 relative">
       <Navbar handleInputChange={handleInputChange} handleSearchClick={handleSearchClick} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} search={search} setSearch={setSearch} />
-      
       
       {notification && (
         <div className="fixed top-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-xl shadow-lg z-50 transition duration-300">
@@ -147,7 +143,7 @@ const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
                           {product.name}
                         </p>
                         <p className="text-blue-600 font-bold">
-                          \${product.price}
+                          ${product.price}
                         </p>
                       </div>
 
@@ -172,7 +168,6 @@ const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
         </div>
       </div>
 
-     
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)} 

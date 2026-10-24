@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 
 const ProductRegister = () => {
   const [name, setName] = useState('');
@@ -8,7 +8,6 @@ const ProductRegister = () => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -17,7 +16,6 @@ const ProductRegister = () => {
     }
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -28,15 +26,13 @@ const ProductRegister = () => {
     data.append('stock', stock); 
 
     try {
-      const response = await axios.post('http://localhost:3000/products/create', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true
+      const response = await API.post('/products/create', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       alert("✅ Product Created Successfully!");
-      (response.data);
+      console.log(response.data);
 
-     
       setName('');
       setPrice('');
       setStock(''); 
@@ -44,7 +40,7 @@ const ProductRegister = () => {
       setImagePreview(null);
 
     } catch (err) {
-      (err);
+      console.error(err);
       alert("❌ Failed to create product!");
     }
   };
@@ -53,7 +49,6 @@ const ProductRegister = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-6 border border-gray-100">
         
-       
         <div className="border-b pb-4 mb-6 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">Add New Medicine</h2>
           <a href="/AdminDashBoard" className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full hover:bg-blue-200 transition">
@@ -62,7 +57,6 @@ const ProductRegister = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
@@ -85,7 +79,6 @@ const ProductRegister = () => {
             </div>
           </div>
 
-         
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
             <input 
@@ -97,7 +90,6 @@ const ProductRegister = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
@@ -123,7 +115,6 @@ const ProductRegister = () => {
             />
           </div>
 
-        
           <button 
             type="submit" 
             className="w-full mt-2 bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md cursor-pointer"

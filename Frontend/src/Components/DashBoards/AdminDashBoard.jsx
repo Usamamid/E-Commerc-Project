@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 import {
   FiShoppingBag,
   FiDollarSign,
@@ -12,9 +13,8 @@ import {
   FiRefreshCw
 } from 'react-icons/fi';
 
-const API_URL = 'http://localhost:3000';
-
 const AdminDashBoard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalSales: 0,
     totalOrders: 0,
@@ -30,16 +30,14 @@ const AdminDashBoard = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const statsRes = await axios.get(`${API_URL}/order/admin/stats`, {
-          withCredentials: true
-        });
+        const statsRes = await API.get('/order/admin/stats');
 
         if (statsRes.data.success) {
           setStats(statsRes.data.stats);
           setRecentOrders(statsRes.data.recentOrders);
         }
 
-        const productsRes = await axios.get(`${API_URL}/products`);
+        const productsRes = await API.get('/products');
         const productData = Array.isArray(productsRes.data)
           ? productsRes.data
           : (productsRes.data.products || productsRes.data.allProducts || []);
@@ -91,11 +89,7 @@ const AdminDashBoard = () => {
 
     try {
       setUpdatingId(product._id);
-      const response = await axios.patch(
-        `${API_URL}/products/update-stock/${product._id}`,
-        payload,
-        { withCredentials: true }
-      );
+      const response = await API.patch(`/products/update-stock/${product._id}`, payload);
 
       if (response.data.success) {
         const updated = response.data.product;
@@ -121,10 +115,8 @@ const AdminDashBoard = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      const response = await axios.patch(`${API_URL}/order/status/${orderId}`, {
+      const response = await API.patch(`/order/status/${orderId}`, {
         status: newStatus
-      }, {
-        withCredentials: true
       });
 
       if (response.data.success) {
@@ -157,19 +149,19 @@ const AdminDashBoard = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <a
-              href="/ProductRegister"
+            <button
+              onClick={() => navigate("/ProductRegister")}
               className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md shadow-indigo-100 transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
             >
               <FiPlus className="w-5 h-5" />
               Create New Product
-            </a>
-            <a
-              href="/"
+            </button>
+            <button
+              onClick={() => navigate("/")}
               className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition-all duration-200 cursor-pointer"
             >
               All Products
-            </a>
+            </button>
           </div>
         </div>
 
@@ -377,8 +369,8 @@ const AdminDashBoard = () => {
                           <option value="Confirmed">Confirmed</option>
                           <option value="Delivered">Delivered</option>
                           <option value="Completed">Completed</option>
-                          <option value="Completed">Shipped</option>
-                          <option value="Completed">Cancelled</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Cancelled">Cancelled</option>
                         </select>
                       </td>
                     </tr>

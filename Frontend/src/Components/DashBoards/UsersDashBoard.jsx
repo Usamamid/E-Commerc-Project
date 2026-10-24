@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 
 const UsersDashBoard = () => {
   const [user, setUser] = useState({ name: "User", email: "user@example.com" });
@@ -13,9 +13,7 @@ const UsersDashBoard = () => {
       try {
         let currentUserId = localStorage.getItem("userId");
         try {
-          const authResponse = await axios.get('http://localhost:3000/login/checkAuth', {
-            withCredentials: true
-          });
+          const authResponse = await API.get('/login/checkAuth');
 
           if (authResponse.data.isAuthenticated && authResponse.data.user) {
             setUser(authResponse.data.user);
@@ -28,9 +26,7 @@ const UsersDashBoard = () => {
         }
 
         if (currentUserId) {
-          const ordersResponse = await axios.get(`http://localhost:3000/order/user/${currentUserId}`, {
-            withCredentials: true
-          });
+          const ordersResponse = await API.get(`/order/user/${currentUserId}`);
           if (ordersResponse.data.success) {
             setOrders(ordersResponse.data.orders);
           }
@@ -47,7 +43,7 @@ const UsersDashBoard = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('http://localhost:3000/logout', { withCredentials: true });
+      await API.get('/logout');
     } catch (err) {
       console.error(err);
     } finally {

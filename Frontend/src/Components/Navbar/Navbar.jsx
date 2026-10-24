@@ -1,20 +1,20 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import axios from 'axios';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 
-const Navbar = ({ isLoggedIn, setIsLoggedIn,search,handleInputChange,handleSearchClick }) => {
+const Navbar = ({ isLoggedIn, setIsLoggedIn, search, handleInputChange, handleSearchClick }) => {
   const navigate = useNavigate();
 
   const setHandleLogout = async () => {
     try {
-      await axios.get('http://localhost:3000/login/logout', { withCredentials: true });
+      await API.get('/login/logout'); // ✅ Updated: Relative path via central API
       setIsLoggedIn(false);
       localStorage.removeItem('userRole');
       alert("Logout Successfully!");
       navigate('/Register');
     } catch (err) {
-      (err);
+      console.error(err);
       alert("Logout failed!");
     }
   };
@@ -49,8 +49,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn,search,handleInputChange,handleSearc
             className="bg-gray-700 text-white placeholder:text-gray-400 border border-gray-600 rounded-lg py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <div className="w-9 h-9 bg-gray-700 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-600 transition">
-            <button onClick={handleSearchClick} className="flex items-center justify-center text-white">
-              
+            <button onClick={handleSearchClick} className="flex items-center justify-center text-white cursor-pointer">
               <Search size={18} />
             </button>
           </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import API from "../services/api"; // ✅ Updated: Importing custom API instance
 
 const Coupons = {
   "SAVE5": 5,
@@ -15,7 +14,6 @@ const Cart = ({ cart, setCart }) => {
   const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
 
-  
   const increaseQty = (_id) => {
     const newCart = cart.map((item) => {
       if (item._id === _id) {
@@ -73,22 +71,17 @@ const Cart = ({ cart, setCart }) => {
         return;
       }
 
-      const response = await axios.post(
-        "http://localhost:3000/order/orders",
-        {
-          items: cart.map(item => ({
-            product: item._id,
-            name: item.name,
-            price: item.price,
-            quantity: Number(item.quantity || item.Quantity || 1) 
-          })),
-          totalAmount: GrandTotal,
-          user: loggedInUserId
-        },
-        {
-          withCredentials: true
-        }
-      );
+      // ✅ FIX: Clean & Relative call using centralized API service
+      const response = await API.post("/order/orders", {
+        items: cart.map(item => ({
+          product: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: Number(item.quantity || item.Quantity || 1) 
+        })),
+        totalAmount: GrandTotal,
+        user: loggedInUserId
+      });
 
       alert("✅ Order confirmed successfully and stock updated!");
       setCart([]); 
@@ -157,7 +150,6 @@ const Cart = ({ cart, setCart }) => {
           )}
         </div>
 
-        
         <div className="bg-white rounded-xl shadow-lg p-5 h-fit shadow-gray-600">
           <h2 className="text-2xl font-bold mb-5 text-center">Bill Summary</h2>
 

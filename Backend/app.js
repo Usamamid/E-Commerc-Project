@@ -1,34 +1,42 @@
-const express=require('express');
-const app=express();
-const cors=require('cors');
+const express = require('express');
+const app = express();
+const cors = require('cors');
 require('dotenv').config(); 
+
+// ✅ FIX 1: Allow credentials and dynamic/all origins for Vercel & local
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true                
+    origin: true, // Allows requests from any frontend origin (including your Vercel URL)
+    credentials: true            
 }));
+
 app.use(express.json());
-const path=require('path');
-const cookieParser=require('cookie-parser');
-const mongooseConnections=require('./config/mongoose-connections');
-const userRoute=require('./routes/userRoute');
-const productRoute=require('./routes/productRoute');
-const login=require('./routes/login')
-const orderRoute=require('./routes/orderRoute')
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const mongooseConnections = require('./config/mongoose-connections');
+
+const userRoute = require('./routes/userRoute');
+const productRoute = require('./routes/productRoute');
+const login = require('./routes/login');
+const orderRoute = require('./routes/orderRoute');
 
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.urlencoded({extended:true}));
-app.use(express.static(path.join(__dirname,'public')));
-app.use('/users',userRoute);
-app.use('/products',productRoute);
-app.use('/login',login)
-app.use('/order', orderRoute)
+// ✅ FIX 2: Added '/api' prefix to match vercel.json routing
+app.use('/api/users', userRoute);
+app.use('/api/products', productRoute);
+app.use('/api/login', login);
+app.use('/api/order', orderRoute);
 
+// Optional: Fallback for local testing if needed
+const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+// ✅ FIX 3: Conditional listen for local, export app for Vercel serverless
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../Frontend/dist', 'index.html'));
-});
-
-app.listen(3000)
+module.exports = app;

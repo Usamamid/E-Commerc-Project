@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
@@ -13,19 +13,20 @@ const Register = () => {
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3000/users/Create', {
+            const response = await API.post('/users/Create', {
                 name,
                 email,
                 password
             });
             alert("User created successfully!");
-            (response.data)
+            console.log(response.data);
             setName('');
             setEmail('');
             setPassword('');
             navigate('/');
         } catch (err) {
-            alert("Registration failed!",err);
+            console.error(err);
+            alert("Registration failed!");
         }
     };
 
@@ -33,10 +34,10 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:3000/login', {
+            const response = await API.post('/login', {
                 password: userPassword,
                 email: userEmail
-            }, { withCredentials: true });
+            });
 
             alert("Login successfully!");
             setUserPassword('');
@@ -45,7 +46,6 @@ const Register = () => {
             if (response.data.userId) {
                 localStorage.setItem('userId', response.data.userId);
             } else if (response.data.user && response.data.user._id) {
-               
                 localStorage.setItem('userId', response.data.user._id);
             }
 
@@ -66,7 +66,6 @@ const Register = () => {
         <div className="flex items-center justify-center h-screen mt-6 bg-gray-100">
             <div className="flex gap-8 flex-wrap">
                 
-              
                 <div className="bg-white p-8 rounded shadow-md w-96">
                      <h2 className="text-2xl font-bold text-center mb-4">Please Register First!</h2>
                      <div className="mb-4">
@@ -104,9 +103,8 @@ const Register = () => {
                      </div>
                 </div>    
 
-               
                 <div className="mb-4 bg-white p-8 rounded shadow-md w-96">
-                     <h2 className="text-xl font-bold text-center mb-4">Please Login!</h2>
+                     <h2 className="text-2xl font-bold text-center mb-4">Please Login!</h2>
                      <div className="mb-4">
                          <form className="flex flex-col space-y-4" onSubmit={userLoginSubmit}>
                              <input 
