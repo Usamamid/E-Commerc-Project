@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../Navbar/Navbar';
 import SideBar from '../DashBoards/SideBar';
-import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
-
+import API from "../../services/api";
 const Products = ({ addToCart, search = "", setSearch = () => {} }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [products, setProducts] = useState([]);

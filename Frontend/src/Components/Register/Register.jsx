@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
+import API from "../../services/api";
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {

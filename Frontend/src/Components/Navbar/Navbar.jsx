@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
+import API from "../../services/api";
 
 const Navbar = ({ isLoggedIn, setIsLoggedIn, search, handleInputChange, handleSearchClick }) => {
   const navigate = useNavigate();

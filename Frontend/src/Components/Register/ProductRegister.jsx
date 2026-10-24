@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import API from '../services/api'; // ✅ Updated: Using central API instance instead of hardcoded localhost
-
+import API from "../../services/api";
 const ProductRegister = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');

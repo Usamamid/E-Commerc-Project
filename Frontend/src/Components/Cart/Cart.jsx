@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api"; // ✅ Updated: Importing custom API instance
+import API from "../../services/api";
 
 const Coupons = {
   "SAVE5": 5,
