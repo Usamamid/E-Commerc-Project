@@ -19,11 +19,12 @@
       "dest": "Backend/app.js"
     },
     {
-      "handle": "filesystem"
+      "src": "/assets/(.*)",
+      "dest": "/Frontend/dist/assets/$1"
     },
     {
-      "src": "/.*",
-      "dest": "Frontend/dist/index.html"
+      "src": "/(.*)",
+      "dest": "/Frontend/dist/index.html"
     }
   ]
 }
