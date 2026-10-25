@@ -22,14 +22,14 @@ async function createDevelopmentOwner() {
         dbgr("❌ Error creating default owner:", err.message);
     }
 }
+mongoose.connect(process.env.MONGODB_URI)
+    .then(async () => {
+        console.log('MongoDB Connected Successfully');
 
-mongoose.connect(`${process.env.MONGODB_URI}`).then(async () => {
-    dbgr('Connected to MongoDB');
-    
-    await createDevelopmentOwner();
-
-}).catch((err) => {
-    dbgr('Error connecting to MongoDB', err);
-});
+        await createDevelopmentOwner();
+    })
+    .catch((err) => {
+        console.error('MongoDB Connection Error:', err.message);
+    });
 
 module.exports = mongoose;
