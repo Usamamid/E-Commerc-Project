@@ -28,6 +28,9 @@ app.use('/api/users', userRoute);
 app.use('/api/products', productRoute);
 app.use('/api/login', login);
 app.use('/api/order', orderRoute);
+app.get('/', (req, res) => {
+    res.send('Backend is running successfully!');
+});
 
 // Optional: Fallback for local testing if needed
 const PORT = process.env.PORT || 3000;
