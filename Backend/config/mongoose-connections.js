@@ -1,4 +1,3 @@
-const config = require('config');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const dbgr = require('debug')('development:mongoose-connections');
@@ -6,14 +5,13 @@ const OwnerModel = require('../models/ownerModel');
 
 async function createDevelopmentOwner() {
     try {
-        // ✅ Shart change kar di: Ab yeh production ya development dono mein chalega agar owner nahi hua
         let owners = await OwnerModel.find();
         
         if (owners.length === 0) {
-            const hashedPassword = await bcrypt.hash(config.get('PASSWORD'), 10);
+            const hashedPassword = await bcrypt.hash(process.env.PASSWORD, 10);
 
             await OwnerModel.create({
-                name: config.get('ADMIN_NAME'),
+                name: process.env.ADMIN_NAME,
                 password: hashedPassword
             });
             dbgr("✅ Default Owner successfully created!");
@@ -25,7 +23,7 @@ async function createDevelopmentOwner() {
     }
 }
 
-mongoose.connect(`${config.get('MONGODB_URI')}`).then(async () => {
+mongoose.connect(`${process.env.MONGODB_URI}`).then(async () => {
     dbgr('Connected to MongoDB');
     
     await createDevelopmentOwner();
