@@ -44,6 +44,7 @@ const AdminDashBoard = () => {
         setProducts(productData);
 
       } catch (error) {
+        (error.message)
         setProducts([]);
       } finally {
         setLoading(false);
