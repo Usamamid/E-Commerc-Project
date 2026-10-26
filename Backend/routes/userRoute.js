@@ -21,7 +21,7 @@ router.post('/Create', async(req, res) => {
     })
     res.send("succes")
    }catch(err){
-    res.status(403).json({message:"something went wrong"})
+    res.status(403).json({message:err.message})
    }
 });
 
