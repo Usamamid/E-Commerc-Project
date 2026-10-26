@@ -10,12 +10,12 @@ const isProd = process.env.NODE_ENV === 'production';
 const baseCookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: 'lax',
     path: '/'
 };
 
-const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
-const loginCookieOptions = { ...baseCookieOptions, maxAge: ONE_YEAR };
+const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+const loginCookieOptions = { ...baseCookieOptions, maxAge: SEVEN_DAYS };
 
 router.post('/', async (req, res) => {
     try {
