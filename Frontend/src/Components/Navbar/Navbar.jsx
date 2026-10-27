@@ -28,7 +28,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, search, handleInputChange, handleSe
           <h2 className="text-xl font-bold">NH-U Store</h2>
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
             <img 
-              src={storeLogo.png} 
+              src={storeLogo} 
               alt="Logo" 
               className="w-full h-full object-cover" 
             />
